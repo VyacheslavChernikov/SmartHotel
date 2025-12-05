@@ -1,4 +1,5 @@
 import os
+import uuid
 import requests
 from dotenv import load_dotenv
 
@@ -6,68 +7,70 @@ load_dotenv()
 
 AUTH_KEY = os.getenv("GIGACHAT_AUTH_KEY")
 AUTH_URL = os.getenv("GIGACHAT_AUTH")
-API_URL = os.getenv("GIGACHAT_API")
+API_URL  = os.getenv("GIGACHAT_API")
 
 
 def get_token():
+    """Получить Access Token через Authorization Key из .env"""
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json",
+        "RqUID": str(uuid.uuid4()),
         "Authorization": f"Basic {AUTH_KEY}",
     }
 
-    body = "scope=GIGACHAT_API_PERS&grant_type=client_credentials"
+    # Важно: тело — строка, НЕ словарь
+    data = "scope=GIGACHAT_API_PERS&grant_type=client_credentials"
 
-    resp = requests.post(
-        AUTH_URL,
-        headers=headers,
-        data=body,
-        verify=False
-    )
+    print("--- TOKEN DEBUG ---")
+    print("Sending request to:", AUTH_URL)
 
-    print("\n--- TOKEN DEBUG ---")
-    print("URL:", AUTH_URL)
-    print("HEADERS:", headers)
-    print("BODY:", body)
+    try:
+        resp = requests.post(AUTH_URL, headers=headers, data=data, verify=False)
+    except Exception as e:
+        print("ERROR:", e)
+        return None
+
     print("STATUS:", resp.status_code)
     print("RESPONSE:", resp.text)
-    print("-------------------\n")
+    print("-------------------")
 
-    resp.raise_for_status()
-    return resp.json()["access_token"]
+    if resp.status_code != 200:
+        return None
 
-
-def ask_gigachat(prompt: str) -> str:
     try:
-        token = get_token()
+        token = resp.json().get("access_token")
+    except:
+        return None
 
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+    return token
 
-        payload = {
-            "model": "GigaChat",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.5,
-        }
 
-        resp = requests.post(
-            API_URL,
-            json=payload,
-            headers=headers,
-            verify=False
-        )
+def ask_gigachat(prompt: str):
+    """Запрос в GigaChat API"""
 
-        print("\n--- AI DEBUG ---")
-        print("STATUS:", resp.status_code)
-        print("RESPONSE:", resp.text)
-        print("----------------\n")
+    token = get_token()
+    if not token:
+        return "AI временно недоступен. Попробуйте позже."
 
-        resp.raise_for_status()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "model": "GigaChat-Pro",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3
+    }
+
+    try:
+        resp = requests.post(API_URL, headers=headers, json=payload, verify=False)
+    except Exception:
+        return "AI временно недоступен."
+
+    try:
         return resp.json()["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        print("GIGACHAT ERROR:", e)
-        return "AI-ассистент временно недоступен."
+    except:
+        return "AI временно недоступен."
