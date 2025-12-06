@@ -1,0 +1,22 @@
+# Django backend
+Django==4.2.7
+djangorestframework==3.14.0
+psycopg2-binary==2.9.9
+
+# Telegram bot (Aiogram)
+aiogram==3.1.1
+aiohttp==3.9.1
+
+# RAG + ChromaDB
+chromadb==0.4.24
+
+# Utils
+python-dotenv==1.0.1
+requests==2.31.0
+
+# For 360 tours (optional)
+jinja2==3.1.2
+
+# For future SaaS expansion
+pydantic==2.5.2
+sqlalchemy==2.0.25
