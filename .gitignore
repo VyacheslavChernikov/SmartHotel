@@ -1,7 +1,57 @@
-venv/
-__pycache__/
-*.pyc
-db.sqlite3
+# Environment
 .env
-.idea/
+.env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyd
+*.so
+*.egg-info/
+*.egg
 *.log
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE / editors
+.idea/
+.vscode/
+*.code-workspace
+
+# Django
+*/migrations/*
+!*/migrations/__init__.py
+
+# Databases
+db.sqlite3
+
+# ChromaDB local storage
+chromadb/
+chroma/
+chroma_db/
+
+# Logs
+logs/
+*.log
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Telegram bot session files
+*.session
+*.session-journal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
